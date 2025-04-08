@@ -5,7 +5,7 @@ const path = require("path");
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(
-      require(path.join(__dirname, "../../firebase-config.json"))
+      require(path.join(__dirname, "..\..\firebase-config.json"))
     ),
     databaseURL: "https://feedback-form-34b40-default-rtdb.firebaseio.com",
   });
