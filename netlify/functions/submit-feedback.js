@@ -1,10 +1,13 @@
 const admin = require("firebase-admin");
+const path = require("path");
 
 // Initialize Firebase once
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(require("../../firebase-config.json")),
-    databaseURL: "https://your-project-id.firebaseio.com",
+    credential: admin.credential.cert(
+      require(path.join(__dirname, "../../firebase-config.json"))
+    ),
+    databaseURL: "https://feedback-form-34b40-default-rtdb.firebaseio.com",
   });
 }
 
