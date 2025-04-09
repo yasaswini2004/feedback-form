@@ -1,44 +1,74 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import { getDatabase, ref, onValue, remove } from 'firebase/database';
+import app from '../firebase';
+import DeleteConfirmationModal from '../DeleteConfirmationModal';
 
-function Admin() {
+const Admin = () => {
   const [feedbacks, setFeedbacks] = useState([]);
-const [loading, setLoading] = useState(true);
+  const [selectedFeedbackId, setSelectedFeedbackId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-useEffect(() => {
-  setLoading(true);
-  fetch("/.netlify/functions/get-feedbacks")
-    .then((res) => res.json())
-    .then((data) => {
-      setLoading(false);
-      setFeedbacks(Array.isArray(data) ? data : []);
-    })
-    .catch((error) => {
-      console.error("Error fetching feedback:", error);
-      setLoading(false);
+  useEffect(() => {
+    const db = getDatabase(app);
+    const feedbackRef = ref(db, 'feedbacks');
+
+    const unsubscribe = onValue(feedbackRef, (snapshot) => {
+      const data = snapshot.val();
+      const loadedFeedbacks = data ? Object.entries(data).map(([id, val]) => ({ id, ...val })) : [];
+      setFeedbacks(loadedFeedbacks);
     });
-}, []);
 
-return (
-  <div className="max-w-2xl mx-auto">
-    <h2 className="text-2xl font-semibold mb-4">Submitted Feedbacks</h2>
+    return () => unsubscribe();
+  }, []);
 
-    {loading ? (
-      <p className="text-gray-600 dark:text-gray-400">Loading feedback...</p>
-    ) : feedbacks.length === 0 ? (
-      <p className="text-gray-600 dark:text-gray-400">No feedback yet.</p>
-    ) : (
-      feedbacks.map((fb, index) => (
-        <div key={index} className="bg-white dark:bg-gray-800 shadow-md rounded p-4 mb-4">
-          <p><strong>Name:</strong> {fb.fullName}</p>
-          <p><strong>Email:</strong> {fb.email}</p>
-          <p><strong>Message:</strong> {fb.message}</p>
-          <p className="text-sm text-gray-500 mt-2">Submitted on: {new Date(fb.timestamp).toLocaleString()}</p>
-        </div>
-      ))
-    )}
-  </div>
-);
+  const handleDeleteClick = (id) => {
+    setSelectedFeedbackId(id);
+    setIsModalOpen(true);
+  };
 
-}
+  const confirmDelete = () => {
+    const db = getDatabase(app);
+    remove(ref(db, `feedbacks/${selectedFeedbackId}`));
+    setIsModalOpen(false);
+    setSelectedFeedbackId(null);
+  };
+
+  const cancelDelete = () => {
+    setIsModalOpen(false);
+    setSelectedFeedbackId(null);
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Feedback Admin Panel</h1>
+      {feedbacks.length === 0 ? (
+        <p>No feedback yet.</p>
+      ) : (
+        <ul className="space-y-4">
+          {feedbacks.map(({ id, name, email, message }) => (
+            <li key={id} className="bg-gray-100 p-4 rounded-lg shadow flex justify-between items-start">
+              <div>
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Message:</strong> {message}</p>
+              </div>
+              <button
+                onClick={() => handleDeleteClick(id)}
+                className="ml-4 text-sm text-red-600 hover:text-red-800"
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <DeleteConfirmationModal
+        isOpen={isModalOpen}
+        onCancel={cancelDelete}
+        onConfirm={confirmDelete}
+      />
+    </div>
+  );
+};
 
 export default Admin;

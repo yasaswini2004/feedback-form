@@ -6,18 +6,57 @@ function FeedbackForm() {
     email: "",
     message: "",
   });
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const validate = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "fullName":
+        if (!value.trim()) error = "Full Name is required";
+        break;
+      case "email":
+        if (!value) {
+          error = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(value)) {
+          error = "Email is invalid";
+        }
+        break;
+      case "message":
+        if (!value.trim()) error = "Feedback message is required";
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validate(name, value),
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      const error = validate(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setLoading(true);
 
     const response = await fetch("/.netlify/functions/submit-feedback", {
@@ -25,13 +64,13 @@ function FeedbackForm() {
       body: JSON.stringify({ ...formData, timestamp: new Date().toISOString() }),
       headers: { "Content-Type": "application/json" },
     });
-    
 
     setLoading(false);
 
     if (response.ok) {
       setSubmitted(true);
       setFormData({ fullName: "", email: "", message: "" });
+      setErrors({});
     }
   };
 
@@ -59,6 +98,7 @@ function FeedbackForm() {
           placeholder="e.g., Yasaswini Sharma"
           className="mt-1 w-full p-2 rounded border dark:border-gray-600 dark:bg-gray-700"
         />
+        {errors.fullName && <p className="text-red-500">{errors.fullName}</p>}
       </label>
 
       <label className="block mb-4">
@@ -72,6 +112,7 @@ function FeedbackForm() {
           placeholder="e.g., example@gmail.com"
           className="mt-1 w-full p-2 rounded border dark:border-gray-600 dark:bg-gray-700"
         />
+        {errors.email && <p className="text-red-500">{errors.email}</p>}
       </label>
 
       <label className="block mb-4">
@@ -84,6 +125,7 @@ function FeedbackForm() {
           placeholder="Write your thoughts here..."
           className="mt-1 w-full p-2 rounded border dark:border-gray-600 dark:bg-gray-700"
         />
+        {errors.message && <p className="text-red-500">{errors.message}</p>}
       </label>
 
       <button

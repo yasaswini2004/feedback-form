@@ -1,5 +1,4 @@
 import admin from "firebase-admin";
-import { readFileSync } from "fs";
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -14,7 +13,7 @@ export async function handler() {
   const feedbackRef = admin.database().ref("feedbacks");
 
   try {
-    const snapshot = await feedbackRef.once("value");
+    const snapshot = await feedbackRef.orderByChild('timestamp').once("value");
     const feedbacksObject = snapshot.val() || {};
 
     // Convert object to array
@@ -27,4 +26,3 @@ export async function handler() {
     return { statusCode: 500, body: JSON.stringify({ error: "Could not fetch feedbacks" }) };
   }
 }
-
