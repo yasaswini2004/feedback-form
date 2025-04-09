@@ -46,22 +46,28 @@ const Admin = () => {
       ) : (
         <ul className="space-y-4">
           {feedbacks.map(({ id, name, email, message }) => (
-            <li key={id} className="bg-gray-100 p-4 rounded-lg shadow flex justify-between items-start">
+            <li
+              key={id}
+              className="bg-gray-100 p-4 rounded-lg shadow flex justify-between items-start"
+            >
               <div>
                 <p><strong>Name:</strong> {name}</p>
                 <p><strong>Email:</strong> {email}</p>
                 <p><strong>Message:</strong> {message}</p>
               </div>
-              <button
-                onClick={() => handleDeleteClick(id)}
-                className="ml-4 text-sm text-red-600 hover:text-red-800"
-              >
-                Delete
-              </button>
+              <div className="ml-4">
+                <button
+                  onClick={() => handleDeleteClick(id)}
+                  className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </div>
             </li>
           ))}
         </ul>
       )}
+
       <DeleteConfirmationModal
         isOpen={isModalOpen}
         onCancel={cancelDelete}
