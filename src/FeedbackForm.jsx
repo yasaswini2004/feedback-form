@@ -20,13 +20,12 @@ function FeedbackForm() {
     e.preventDefault();
     setLoading(true);
 
-    const response = await fetch("/api/submit-feedback", {
+    const response = await fetch("/.netlify/functions/submit-feedback", {
       method: "POST",
       body: JSON.stringify({ ...formData, timestamp: new Date().toISOString() }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
+    
 
     setLoading(false);
 
