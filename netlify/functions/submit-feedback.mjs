@@ -1,14 +1,14 @@
 import admin from "firebase-admin";
 import { readFileSync } from "fs";
 
-if (!admin.apps.length) {
-  const firebaseConfig = JSON.parse(readFileSync("./firebase-config.json", "utf8"));
 
+if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(firebaseConfig),
+    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_CONFIG)),
     databaseURL: "https://feedback-form-34b40-default-rtdb.firebaseio.com",
   });
 }
+
 
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
