@@ -4,10 +4,22 @@ function Admin() {
   const [feedbacks, setFeedbacks] = useState([]);
 
   useEffect(() => {
-    fetch("/api/get-feedbacks")
+    fetch("/.netlify/functions/get-feedbacks")
       .then((res) => res.json())
-      .then((data) => setFeedbacks(data));
+      .then((data) => {
+        console.log("Received feedback data:", data);
+  
+        // Ensure the response is an array before setting state
+        if (Array.isArray(data)) {
+          setFeedbacks(data);
+        } else {
+          console.error("Error: Expected an array, received:", data);
+          setFeedbacks([]);
+        }
+      })
+      .catch((error) => console.error("Error fetching feedback:", error));
   }, []);
+  
 
   return (
     <div className="max-w-2xl mx-auto">
