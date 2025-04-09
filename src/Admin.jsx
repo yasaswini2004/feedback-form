@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { getDatabase, ref, onValue, remove } from 'firebase/database';
 import app from '../firebase';
-import DeleteConfirmationModal from '../DeleteConfirmationModal';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
 
 const Admin = () => {
   const [feedbacks, setFeedbacks] = useState([]);
