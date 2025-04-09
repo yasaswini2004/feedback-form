@@ -12,7 +12,7 @@ if (!admin.apps.length) {
 
 export async function handler(event) {
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
+    return { statusCode: 405, body: JSON.stringify({ error: `Method ${event.httpMethod} Not Allowed` }) };
   }
 
   try {
@@ -28,6 +28,7 @@ export async function handler(event) {
 
     return { statusCode: 200, body: JSON.stringify({ message: "Feedback stored successfully!" }) };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: "Could not store feedback" }) };
+    console.error("Error storing feedback:", err);
+    return { statusCode: 500, body: JSON.stringify({ error: err.message || "Could not store feedback" }) };
   }
 }
